@@ -3,7 +3,9 @@
 {% block content %}
 <div class="dashboard-container">
   <div class="dashboard-box text-center mx-auto my-5" style="max-width: 800px;">
-    <h2 class="mb-4 text-black">Your Investor Type</h2>
+    <h1 class="dashboard-title-box mb-4" style="font-size: 3rem;">
+      Your Investor Type
+    </h1>
     <p class="display-5 text-uppercase mb-4 text-black">{{ profile.investor_type }}</p>
     <p class="lead mb-4 text-black">{{ recommendations.description }}</p>
 
@@ -29,9 +31,11 @@
       {% endfor %}
     </ul>
 
-    <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-      Back to Dashboard
-    </a>
+    <div class="dashboard-nav-box">
+      <a href="{% url 'dashboard' %}" class="dashboard-btn">
+        Back to Dashboard
+      </a>
+    </div>
   </div>
 </div>
 {% endblock %}
