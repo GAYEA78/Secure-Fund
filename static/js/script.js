@@ -25,8 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
  const toggle = document.getElementById('darkToggle');
  const container = document.querySelector('.dashboard-container');
- toggle.addEventListener('click', () => {
-  container.classList.toggle('dark-mode');
-});
+ if (toggle && container) {
+   toggle.addEventListener('click', (e) => {
+     e.preventDefault();
+     container.classList.toggle('dark-mode');
+   });
+ }
 
 });
