@@ -807,7 +807,6 @@ def create_checkout_session(request):
 
     cents = int(dollars * 100)
     session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
         line_items=[{
             'price_data': {
                 'currency': 'usd',
