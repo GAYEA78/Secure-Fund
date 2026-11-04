@@ -1,17 +1,43 @@
-{% extends 'base.html' %}
-{% block title %}Edit User – Admin{% endblock %}
+{% extends 'admin/staff_base.html' %}
+{% block title %}Edit {{ user.username }} | Staff | Secure Fund{% endblock %}
+{% block page_class %}page-form{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-  <div class="dashboard-box mb-4">
-    <h2 class="mb-4 text-center">Edit User: {{ user.username }}</h2>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-primary" type="submit">Save</button>
-        <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
-      </div>
-    </form>
+<div class="page-head">
+  <div>
+    <a class="crumb" href="{% url 'user_list' %}">Users</a>
+    <h1>Edit {{ user.username }}</h1>
   </div>
 </div>
+
+<section class="panel">
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="notice notice-error flash">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>{% endif %}
+    <div class="field">
+      <label for="{{ form.username.id_for_label }}">Username</label>
+      {{ form.username }}
+      {% for error in form.username.errors %}<div class="error">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="field">
+      <label for="{{ form.email.id_for_label }}">Email</label>
+      {{ form.email }}
+      {% for error in form.email.errors %}<div class="error">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="field">
+      <label class="check" for="{{ form.is_active.id_for_label }}">{{ form.is_active }}<span>Active<span class="cell-sub">Inactive users can't sign in.</span></span></label>
+    </div>
+    <div class="field">
+      <label class="check" for="{{ form.is_staff.id_for_label }}">{{ form.is_staff }}<span>Staff<span class="cell-sub">Staff can see every account, review documents and answer messages.</span></span></label>
+    </div>
+    <div class="field">
+      <label for="{{ form.groups.id_for_label }}">Groups</label>
+      {{ form.groups }}
+      <div class="help">Hold Ctrl (Cmd on Mac) to select more than one.</div>
+    </div>
+    <div class="actions" style="margin-top: 24px;">
+      <button class="btn" type="submit">Save changes</button>
+      <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</section>
 {% endblock %}

@@ -1,42 +1,38 @@
-{% extends 'base.html' %}
-{% block title %}User Management – Admin{% endblock %}
+{% extends 'admin/staff_base.html' %}
+{% block title %}Users | Staff | Secure Fund{% endblock %}
 {% block content %}
-<div class="dashboard-nav-box mb-4">
-  <a href="{% url 'admin_dashboard' %}" class="dashboard-btn">Back to Overview</a>
-</div>
-
-<div class="dashboard-container">
-  <div class="dashboard-box mb-4 text-center">
-    <h2 class="mb-4">User Management</h2>
-    <div class="dashboard-table">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Active</th>
-            <th>Staff</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u in users %}
-          <tr>
-            <td>{{ u.username }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.is_active }}</td>
-            <td>{{ u.is_staff }}</td>
-            <td>
-              <a href="{% url 'user_edit' u.pk %}" class="btn btn-sm btn-primary">Edit</a>
-              <a href="{% url 'user_delete' u.pk %}" class="btn btn-sm btn-danger">Delete</a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="5">No users.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+<div class="page-head">
+  <div>
+    <h1>Users</h1>
+    <p>Edit sign-in details and permissions, or remove an account.</p>
   </div>
 </div>
+
+<section class="panel panel-flush">
+  {% if users %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Username</th><th class="hide-sm">Email</th><th>Status</th><th class="hide-sm">Role</th><th><span class="visually-hidden">Actions</span></th></tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="cell-primary">{{ u.username }}</td>
+          <td class="hide-sm muted">{{ u.email|default:"No email" }}</td>
+          <td>{% if u.is_active %}<span class="tag tag-pos">Active</span>{% else %}<span class="tag">Inactive</span>{% endif %}</td>
+          <td class="hide-sm">{% if u.is_staff %}Staff{% else %}Customer{% endif %}</td>
+          <td class="actions-cell">
+            <a href="{% url 'user_edit' u.pk %}" class="btn btn-small btn-secondary">Edit</a>
+            <a href="{% url 'user_delete' u.pk %}" class="btn btn-small btn-secondary">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty"><p>No users yet.</p></div>
+  {% endif %}
+</section>
 {% endblock %}

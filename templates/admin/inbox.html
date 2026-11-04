@@ -1,39 +1,41 @@
-{% extends 'base.html' %}
-{% block title %}Admin Inbox{% endblock %}
-
+{% extends 'admin/staff_base.html' %}
+{% block title %}Messages | Staff | Secure Fund{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-
-  <div class="dashboard-box mb-4">
-    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary w-100 mb-3">⬅ Back to Admin Dashboard</a>
-    <h2>📬 Admin Inbox</h2>
+<div class="page-head">
+  <div>
+    <h1>Messages</h1>
+    <p>Conversations with customers, oldest message first.</p>
   </div>
+</div>
 
+<div class="stack">
   {% for convo in grouped_conversations %}
-    <div class="dashboard-box mb-4">
-      <h4>👤 {{ convo.user.username }}</h4>
-      <ul class="list-group mb-3">
-        {% for msg in convo.messages %}
-          <li class="list-group-item {% if msg.sender == request.user %}list-group-item-success{% else %}list-group-item-light{% endif %}">
-            <strong>
-              {% if msg.sender == request.user %}🛡️ You{% else %}👤 {{ msg.sender.username }}{% endif %}
-            </strong>: {{ msg.content }}<br>
-            <small class="text-muted">{{ msg.timestamp|date:"Y-m-d H:i" }}</small>
-          </li>
-        {% endfor %}
-      </ul>
-
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="receiver" value="{{ convo.user.id }}">
-        <div class="mb-2">
-          <textarea name="content" class="form-control" placeholder="Type reply..." required></textarea>
-        </div>
-        <button class="btn btn-primary w-100">Reply</button>
-      </form>
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>{{ convo.user.get_full_name|default:convo.user.username }}</h2>
+        <p>{{ convo.user.username }}</p>
+      </div>
+      <a href="{% url 'admin_chat' convo.user.id %}">Open conversation</a>
     </div>
+    <div class="thread-log">
+      {% for msg in convo.messages %}
+      <div class="msg{% if msg.sender == request.user %} msg-own{% endif %}">
+        <div class="msg-body">{{ msg.content }}</div>
+        <div class="msg-meta">{% if msg.sender == request.user %}You{% else %}{{ msg.sender.username }}{% endif %}, {{ msg.timestamp|date:"M j, g:i A" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <form method="post" class="input-row" style="margin-top: 20px; align-items: flex-end;">
+      {% csrf_token %}
+      <input type="hidden" name="receiver" value="{{ convo.user.id }}">
+      <label for="reply-{{ convo.user.id }}" class="visually-hidden">Reply to {{ convo.user.username }}</label>
+      <textarea name="content" id="reply-{{ convo.user.id }}" placeholder="Write a reply" required data-submit-on-enter style="min-height: 40px; height: 40px; flex: 1;"></textarea>
+      <button class="btn" type="submit">Reply</button>
+    </form>
+  </section>
   {% empty %}
-    <p>No conversations yet.</p>
+  <section class="panel"><div class="empty"><p>No conversations yet. Messages from customers will show up here.</p></div></section>
   {% endfor %}
 </div>
 {% endblock %}

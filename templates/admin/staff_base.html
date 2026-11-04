@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block subnav %}
+<div class="subnav">
+  <nav class="nav" aria-label="Staff">
+    <a href="{% url 'admin_dashboard' %}" {% if current == 'admin_dashboard' %}aria-current="page"{% endif %}>Overview</a>
+    <a href="{% url 'user_list' %}" {% if current == 'user_list' or current == 'user_edit' or current == 'user_delete' %}aria-current="page"{% endif %}>Users</a>
+    <a href="{% url 'account_list' %}" {% if current == 'account_list' or current == 'account_edit' %}aria-current="page"{% endif %}>Accounts</a>
+    <a href="{% url 'kyc_list' %}" {% if current == 'kyc_list' or current == 'kyc_edit' %}aria-current="page"{% endif %}>Verification</a>
+    <a href="{% url 'admin_inbox' %}" {% if current == 'admin_inbox' or current == 'admin_chat' %}aria-current="page"{% endif %}>Messages</a>
+  </nav>
+</div>
+{% endblock %}

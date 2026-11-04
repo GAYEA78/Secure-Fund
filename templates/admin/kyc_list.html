@@ -1,38 +1,34 @@
-{% extends 'base.html' %}
-{% block title %}Manage KYC – Admin{% endblock %}
+{% extends 'admin/staff_base.html' %}
+{% block title %}Verification | Staff | Secure Fund{% endblock %}
 {% block content %}
-<div class="dashboard-nav-box mb-4">
-  <a href="{% url 'admin_dashboard' %}" class="dashboard-btn">Back to Overview</a>
-</div>
-<div class="dashboard-container">
-  <div class="dashboard-box mb-4">
-    <h2 class="text-center mb-4">KYC Documents</h2>
-    <div class="dashboard-table">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Uploaded</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for doc in docs %}
-          <tr>
-            <td>{{ doc.user.username }}</td>
-            <td>{{ doc.uploaded_at|date:"Y-m-d H:i" }}</td>
-            <td>{{ doc.get_status_display }}</td>
-            <td>
-              <a class="btn btn-sm btn-primary" href="{% url 'kyc_edit' doc.pk %}">Edit</a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="4">No documents.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+<div class="page-head">
+  <div>
+    <h1>Verification</h1>
+    <p>ID documents sent by customers. Open one to approve or reject it.</p>
   </div>
 </div>
+
+<section class="panel panel-flush">
+  {% if docs %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Customer</th><th>Uploaded</th><th>Status</th><th><span class="visually-hidden">Actions</span></th></tr>
+      </thead>
+      <tbody>
+        {% for doc in docs %}
+        <tr>
+          <td class="cell-primary">{{ doc.user.username }}</td>
+          <td class="muted">{{ doc.uploaded_at|date:"M j, Y" }}<span class="cell-sub">{{ doc.uploaded_at|date:"g:i A" }}</span></td>
+          <td><span class="tag{% if doc.status == 'A' %} tag-pos{% elif doc.status == 'R' %} tag-neg{% else %} tag-warn{% endif %}">{{ doc.get_status_display }}</span></td>
+          <td class="actions-cell"><a class="btn btn-small{% if doc.status != 'P' %} btn-secondary{% endif %}" href="{% url 'kyc_edit' doc.pk %}">{% if doc.status == 'P' %}Review{% else %}Change{% endif %}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty"><p>No documents have been uploaded yet.</p></div>
+  {% endif %}
+</section>
 {% endblock %}
