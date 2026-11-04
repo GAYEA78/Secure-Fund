@@ -1,9 +1,11 @@
 from django.urls import path, include
 from . import views
+from . import performance
 
 urlpatterns = [
-    path('', views.home, name='home'),              
+    path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('performance/', performance.performance_data, name='performance_data'),
     path('signup/', views.signup, name='signup'),
     path('pdf-statement/', views.StatementPDFView.as_view(), name='pdf_statement'),
     path('create-checkout-session/', views.create_checkout_session, name='create_checkout_session'),
@@ -45,5 +47,4 @@ urlpatterns = [
     path('rebalance/manual/', views.manual_rebalance, name='manual_rebalance'),
     path('rebalance/manual/apply/', views.apply_manual_rebalance, name='apply_manual_rebalance'),
 
- 
 ]

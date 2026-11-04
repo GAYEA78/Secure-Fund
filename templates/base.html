@@ -48,7 +48,7 @@
       </button>
       {% if request.user.is_authenticated %}
       <span class="topbar-user">{{ request.user.first_name|default:request.user.username }}</span>
-      <form action="{% url 'logout' %}" method="post">
+      <form action="{% url 'logout' %}" method="post" data-no-live>
         {% csrf_token %}
         <button type="submit" class="link-button">Sign out</button>
       </form>
@@ -81,7 +81,6 @@
 
 <footer class="footer">
   <div class="footer-inner">
-    <span>Secure Fund, a demo account built with Django. No real money moves here.</span>
     <span>&copy; {% now "Y" %} Arona Gaye</span>
   </div>
 </footer>

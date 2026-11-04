@@ -8,7 +8,7 @@
     <p>Welcome back, {{ user.first_name|default:user.username }}.</p>
   </div>
   <div class="actions">
-    <a class="btn btn-secondary" href="{% url 'pdf_statement' %}">Download statement</a>
+    <a class="btn btn-secondary" href="{% url 'pdf_statement' %}" data-no-live>Download statement</a>
   </div>
 </div>
 
@@ -32,7 +32,7 @@
       <p class="band-figure">${{ account.balance|floatformat:"2g" }}</p>
       <p class="band-meta">Account opened {{ account.created_at|date:"M j, Y" }}{% if account.auto_rebalance_enabled %}. Auto-rebalancing is on.{% endif %}</p>
     </div>
-    <form method="post" action="{% url 'create_checkout_session' %}">
+    <form method="post" action="{% url 'create_checkout_session' %}" data-no-live>
       {% csrf_token %}
       <label for="deposit-amount">Add funds</label>
       <div class="input-row">
@@ -44,6 +44,18 @@
       </div>
       <p class="help">Pays with a Stripe test card. Card numbers are in the <a href="https://docs.google.com/document/d/1Buti0FxZI-_rRxxR5JzVtrw5a9tT4dyKBidL33jOL4E/edit?tab=t.0" target="_blank" rel="noopener">demo guide</a>.</p>
     </form>
+  </section>
+
+  <section class="panel" data-performance data-src="{% url 'performance_data' %}">
+    <div class="panel-head">
+      <div>
+        <h2>Total gain</h2>
+        <p data-perf-since>Loading price history</p>
+      </div>
+      <p class="perf-figure" data-perf-total></p>
+    </div>
+    <div class="chart-box chart-box-tall"><canvas id="performance-chart" aria-label="Total gain over time"></canvas></div>
+    <p class="muted small" data-perf-empty hidden>Your gain is tracked from the day you buy your first shares. The line fills in after each market close.</p>
   </section>
 
   <div class="grid grid-main">
@@ -218,93 +230,8 @@
     <div class="empty"><p>No activity yet. Your first deposit will show up here.</p></div>
     {% endif %}
   </section>
-
-  {% if price_history_data.labels|length > 1 %}
-  <section class="panel">
-    <div class="panel-head">
-      <div>
-        <h2>Trade prices</h2>
-        <p>The price you paid or received on each trade date.</p>
-      </div>
-    </div>
-    <div class="chart-box chart-box-tall"><canvas id="price-chart" aria-label="Trade prices by date"></canvas></div>
-  </section>
-  {% endif %}
 </div>
 
 {{ labels|json_script:"allocation-labels" }}
 {{ data|json_script:"allocation-values" }}
-{{ price_history_data|json_script:"price-history" }}
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
-<script>
-(function () {
-  var charts = [];
-  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-  function read(id) { var el = document.getElementById(id); return el ? JSON.parse(el.textContent) : null; }
-  function money(v) { return "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-
-  function draw() {
-    charts.forEach(function (c) { c.destroy(); });
-    charts = [];
-    var palette = ["--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5", "--chart-6"].map(css);
-    var ink = css("--muted");
-    var rule = css("--rule");
-    var surface = css("--surface");
-    Chart.defaults.font.family = css("--font");
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = ink;
-
-    var allocation = document.getElementById("allocation-chart");
-    if (allocation) {
-      charts.push(new Chart(allocation, {
-        type: "doughnut",
-        data: {
-          labels: read("allocation-labels"),
-          datasets: [{ data: read("allocation-values"), backgroundColor: palette, borderColor: surface, borderWidth: 2 }]
-        },
-        options: {
-          maintainAspectRatio: false,
-          cutout: "68%",
-          plugins: {
-            legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, padding: 14 } },
-            tooltip: { callbacks: { label: function (ctx) { return " " + ctx.label + "  " + money(ctx.parsed); } } }
-          }
-        }
-      }));
-    }
-
-    var price = document.getElementById("price-chart");
-    var history = read("price-history");
-    if (price && history) {
-      charts.push(new Chart(price, {
-        type: "line",
-        data: {
-          labels: history.labels,
-          datasets: history.datasets.map(function (set, i) {
-            var color = palette[i % palette.length];
-            return { label: set.label, data: set.data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0, stepped: "before" };
-          })
-        },
-        options: {
-          maintainAspectRatio: false,
-          interaction: { mode: "index", intersect: false },
-          plugins: {
-            legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, padding: 14 } },
-            tooltip: { callbacks: { label: function (ctx) { return " " + ctx.dataset.label + "  " + money(ctx.parsed.y); } } }
-          },
-          scales: {
-            x: { grid: { display: false }, border: { color: rule } },
-            y: { grid: { color: rule }, border: { display: false }, ticks: { callback: function (v) { return money(v); } } }
-          }
-        }
-      }));
-    }
-  }
-
-  if (window.Chart) { draw(); document.addEventListener("themechange", draw); }
-})();
-</script>
 {% endblock %}

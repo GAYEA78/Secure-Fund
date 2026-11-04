@@ -1,16 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Investor profile | Secure Fund{% endblock %}
 {% block page_class %}page-narrow{% endblock %}
-{% block head %}
-<style>
-  .question { border: 0; margin: 0; padding: 24px 0; border-top: 1px solid var(--rule); }
-  .question:first-of-type { border-top: 0; padding-top: 0; }
-  .question legend { float: left; width: 100%; font-weight: 600; font-size: 0.9375rem; padding: 0; margin-bottom: 4px; }
-  .question legend + * { clear: both; }
-  .question .help { margin: 0 0 14px; }
-  .question input[type="number"] { max-width: 160px; }
-</style>
-{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
@@ -47,7 +37,7 @@
     </fieldset>
 
     <fieldset class="question">
-      <legend><label for="id_time_horizon" style="margin: 0; font-size: inherit; color: inherit; font-weight: inherit;">How many years do you plan to stay invested?</label></legend>
+      <legend><label for="id_time_horizon">How many years do you plan to stay invested?</label></legend>
       <p class="help">Longer horizons can ride out bigger swings.</p>
       <input type="number" name="time_horizon" id="id_time_horizon" min="1" max="60" step="1" value="{{ form.time_horizon.value|default:'' }}" inputmode="numeric" placeholder="10" required>
       {% for error in form.time_horizon.errors %}<div class="error">{{ error }}</div>{% endfor %}
