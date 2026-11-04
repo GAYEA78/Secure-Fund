@@ -1,63 +1,63 @@
 {% extends 'base.html' %}
-{% block title %}Welcome to Arona Bank{% endblock %}
-{% block content %}
-
-<div class="hero">
-  <div class="hero-box">
-    <h1><span class="dashboard-title-box">Arona Edge Fintech</span></h1>
-    <p class="lead">Global Vision Meets Next-Gen Banking.</p>
-    {% if user.is_authenticated %}
-      <a class="btn btn-primary btn-lg me-2" href="{% url 'dashboard' %}">Dashboard</a>
-      <form action="{% url 'logout' %}" method="post" style="display: inline;">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary btn-lg me-2">🔓 Logout</button>
-      </form>
-    {% else %}
-      <a class="btn btn-primary btn-lg me-2" href="{% url 'signup' %}">Get Started</a>
-      <a class="btn btn-outline-light btn-lg" href="{% url 'login' %}">Sign In</a>
-    {% endif %}
+{% block title %}Secure Fund{% endblock %}
+{% block main %}
+<section class="hero">
+  <div>
+    <h1>Fund it, invest it, and see every entry.</h1>
+    <p class="hero-lede">Secure Fund is a demo cash and investing account. Deposit with a Stripe test card, buy and sell real tickers at market prices, and follow your money through a double-entry ledger.</p>
+    <div class="actions">
+      {% if user.is_authenticated %}
+      <a class="btn btn-large" href="{% url 'dashboard' %}">Go to your overview</a>
+      {% else %}
+      <a class="btn btn-large" href="{% url 'signup' %}">Open an account</a>
+      <a class="btn btn-large btn-secondary" href="{% url 'login' %}">Sign in</a>
+      {% endif %}
+    </div>
+    <p class="hero-note">Test card numbers and staff logins are in the <a href="https://docs.google.com/document/d/1Buti0FxZI-_rRxxR5JzVtrw5a9tT4dyKBidL33jOL4E/edit?usp=sharing" target="_blank" rel="noopener">demo guide</a>.</p>
   </div>
-</div>
 
-
-
-<div class="tabs dashboard-nav-box">
-  <button class="dashboard-btn active" data-tab="about">About Us</button>
-  <button class="dashboard-btn" data-tab="services">Services</button>
-  <button class="dashboard-btn" data-tab="why">Why Arona?</button>
-  <button class="dashboard-btn" data-tab="contact">Contact</button>
-</div>
-
-<section id="about" class="tab-content dashboard-box active">
-  <h2>About Us</h2>
-  <p>We deliver secure, intuitive digital banking that puts you in control.</p>
+  <div class="statement" aria-label="Sample account statement">
+    <div class="statement-head">
+      <div>
+        <p class="band-label">Cash balance</p>
+        <p class="statement-total">$1,463.84</p>
+      </div>
+      <p class="statement-acct">Sample statement<br>Oct 28 to Nov 3</p>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Date</th><th>Description</th><th class="num">Amount</th><th class="num hide-sm">Balance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Nov 3</td><td class="desc">Card deposit</td><td class="num pos">+500.00</td><td class="num hide-sm">1,463.84</td></tr>
+          <tr><td>Nov 2</td><td class="desc">Sell 1 AAPL at $231.06</td><td class="num pos">+231.06</td><td class="num hide-sm">963.84</td></tr>
+          <tr><td>Nov 1</td><td class="desc">Buy 2 VTI at $291.40</td><td class="num">&minus;582.80</td><td class="num hide-sm">732.78</td></tr>
+          <tr><td>Oct 30</td><td class="desc">Buy 3 AAPL at $228.14</td><td class="num">&minus;684.42</td><td class="num hide-sm">1,315.58</td></tr>
+          <tr><td>Oct 28</td><td class="desc">Card deposit</td><td class="num pos">+2,000.00</td><td class="num hide-sm">2,000.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
-<section id="services" class="tab-content dashboard-box">
-  <h2>Our Services</h2>
-  <ul>
-    <li>Real-time balance tracking</li>
-    <li>Instant PDF statements</li>
-    <li>Seamless card deposits</li>
-    <li>24/7 support</li>
-  </ul>
+<section class="features">
+  <div class="features-inner">
+    <div>
+      <h2>What's in the account</h2>
+      <p>Everything a small brokerage needs, from the first deposit to the staff who review your documents.</p>
+      <p class="small">Questions about the project? Email <a href="mailto:gayearona89@gmail.com">gayearona89@gmail.com</a> or call 860-853-7006.</p>
+    </div>
+    <dl>
+      <div><dt>Card deposits</dt><dd>Add funds through Stripe Checkout. The deposit posts to your balance once the payment clears.</dd></div>
+      <div><dt>Double-entry ledger</dt><dd>Every deposit, buy and sell is recorded as a credit or debit. Download any statement as a PDF.</dd></div>
+      <div><dt>Simulated trading</dt><dd>Buy and sell any listed ticker at its latest market close, pulled from Yahoo Finance.</dd></div>
+      <div><dt>Investor profile</dt><dd>Four questions place you as Income, Growth or Aggressive, with an allocation to match.</dd></div>
+      <div><dt>Rebalancing</dt><dd>See how far your holdings drift from target, then adjust by hand or turn on auto-rebalancing.</dd></div>
+      <div><dt>Identity verification</dt><dd>Upload an ID document for review. Staff approve or reject it, and you see the status.</dd></div>
+      <div><dt>Two-step sign in</dt><dd>Turn on email codes so a password alone can't open your account.</dd></div>
+      <div><dt>Support messages</dt><dd>Write to staff from inside the app and keep the whole conversation in one thread.</dd></div>
+    </dl>
+  </div>
 </section>
-
-<section id="why" class="tab-content dashboard-box">
-  <h2>Why Arona?</h2>
-  <ul>
-    <li>Banking built on transparency</li>
-    <li>Advanced security</li>
-    <li>User-first design</li>
-  </ul>
-</section>
-
-<section id="contact" class="tab-content dashboard-box">
-  <h2>Contact</h2>
-  <p>Email: <a href="mailto:gayearona89@gmail.com">gayearona89@gmail.com</a></p>
-  <p>Phone: 860-853-7006</p>
-</section>
-
-
-
 {% endblock %}

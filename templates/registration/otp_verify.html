@@ -1,18 +1,19 @@
-{% extends 'base.html' %}
-{% block title %}Verify Code – Arona Fintech Bank{% endblock %}
-{% block content %}
-<div class="hero">
-  <div class="hero-box" style="max-width:400px; margin:0 auto;">
-    <h1>Enter Your Code</h1>
-    <p class="lead">A one-time code was sent to your email.</p>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.code }}
-      {% for error in form.code.errors %}
-        <div class="text-danger">{{ error }}</div>
-      {% endfor %}
-      <button class="btn btn-primary btn-lg w-100 mt-3" type="submit">Verify</button>
-    </form>
+{% extends 'auth.html' %}
+{% block title %}Verify sign in | Secure Fund{% endblock %}
+{% block top_link %}<a href="{% url 'login' %}">Back to sign in</a>{% endblock %}
+{% block auth %}
+<h1>Check your email</h1>
+<p>We sent a 6-digit code to the email on your account. It expires in a few minutes.</p>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="field">
+    <label for="id_code">Verification code</label>
+    <input type="text" name="code" id="id_code" class="code-input" maxlength="6" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" required autofocus>
+    {% for error in form.code.errors %}<div class="error">{{ error }}</div>{% endfor %}
   </div>
-</div>
+  <button type="submit" class="btn btn-large btn-block">Verify and continue</button>
+</form>
+
+<p class="auth-alt">No email after a minute? Check your spam folder, or <a href="{% url 'login' %}">sign in again</a> to get a new code.</p>
 {% endblock %}

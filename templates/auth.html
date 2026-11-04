@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="auth">
+  <aside class="auth-side">
+    <a class="brand" href="{% url 'home' %}">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+      Secure Fund
+    </a>
+    <div class="auth-side-body">
+      <h2>Every deposit and trade, written down as it happens.</h2>
+      <p>Each movement of money is posted to a ledger, so your balance is always the sum of entries you can read.</p>
+      <div class="auth-ledger" aria-hidden="true">
+        <div><span>Card deposit</span><span>+$1,500.00</span></div>
+        <div><span>Buy 3 AAPL at $228.14</span><span>&minus;$684.42</span></div>
+        <div><span>Sell 1 MSFT at $431.20</span><span>+$431.20</span></div>
+        <div><span>Balance</span><span>$1,246.78</span></div>
+      </div>
+    </div>
+    <p class="auth-side-foot">Demo project. Payments run in Stripe test mode.</p>
+  </aside>
+  <main class="auth-main">
+    <div class="auth-main-top">
+      <a class="brand" href="{% url 'home' %}">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        Secure Fund
+      </a>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch color theme">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
+      </button>
+      {% block top_link %}{% endblock %}
+    </div>
+    <div class="auth-form">
+      {% if messages %}
+      <div class="flash">
+        {% for message in messages %}
+        <div class="notice{% if message.tags == 'success' %} notice-success{% elif message.tags == 'warning' %} notice-warning{% elif message.tags == 'error' %} notice-error{% endif %}" role="status">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% block auth %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}

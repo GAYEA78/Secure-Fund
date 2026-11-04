@@ -1,35 +1,48 @@
-// static/js/script.js
+document.addEventListener("DOMContentLoaded", function () {
+  var root = document.documentElement;
 
-document.addEventListener('DOMContentLoaded', function() {
-  const tabs = document.querySelectorAll('.tabs button');
-  const contents = document.querySelectorAll('.tab-content');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-
-      tabs.forEach(t => t.classList.remove('active'));
-      contents.forEach(c => c.classList.remove('active'));
-
-
-      tab.classList.add('active');
-      document.getElementById(tab.dataset.tab).classList.add('active');
+  document.querySelectorAll("[data-theme-toggle]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
+      document.dispatchEvent(new CustomEvent("themechange", { detail: next }));
     });
   });
 
+  document.querySelectorAll("[data-file-input]").forEach(function (input) {
+    var label = document.querySelector(input.getAttribute("data-file-input"));
+    input.addEventListener("change", function () {
+      if (label) { label.textContent = input.files.length ? input.files[0].name : ""; }
+    });
+  });
 
-  if (tabs.length > 0) {
-    tabs[0].classList.add('active');
-    const first = document.getElementById(tabs[0].dataset.tab);
-    if (first) first.classList.add('active');
-  }
+  document.querySelectorAll("[data-scroll-end]").forEach(function (el) {
+    el.scrollTop = el.scrollHeight;
+  });
 
- const toggle = document.getElementById('darkToggle');
- const container = document.querySelector('.dashboard-container');
- if (toggle && container) {
-   toggle.addEventListener('click', (e) => {
-     e.preventDefault();
-     container.classList.toggle('dark-mode');
-   });
- }
+  document.querySelectorAll("[data-sum]").forEach(function (form) {
+    var output = form.querySelector("[data-sum-output]");
+    var inputs = form.querySelectorAll("[data-sum-input]");
+    function update() {
+      var total = 0;
+      inputs.forEach(function (input) {
+        var value = parseFloat(String(input.value).replace(",", "."));
+        if (!isNaN(value)) { total += value; }
+      });
+      output.textContent = total.toFixed(2) + "%";
+      output.classList.toggle("neg", Math.abs(total - 100) > 0.01);
+    }
+    inputs.forEach(function (input) { input.addEventListener("input", update); });
+    update();
+  });
 
+  document.querySelectorAll("textarea[data-submit-on-enter]").forEach(function (area) {
+    area.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        if (area.value.trim()) { area.form.requestSubmit(); }
+      }
+    });
+  });
 });
