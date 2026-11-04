@@ -1,19 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}Payment Successful – Arona Fintech Bank{% endblock %}
+{% block title %}Deposit received | Secure Fund{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
 {% block content %}
-
-<div class="dashboard-container">
-  <div class="dashboard-box text-center mx-auto mb-4">
-    <i class="fa fa-check-circle fa-4x mb-3" 
-       aria-hidden="true" 
-       style="color: var(--arona-accent);">
-    </i>
-    <h1>Payment Successful!</h1>
-    <p class="lead">Your deposit has been credited to your account.</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'dashboard' %}">
-      Back to Dashboard
-    </a>
+<section class="panel" style="padding: 40px;">
+  <span class="tag tag-pos">Payment complete</span>
+  <h1 style="margin-top: 16px;">Deposit received</h1>
+  <p class="muted" style="margin-top: 8px;">Stripe confirmed the payment and the amount has been added to your cash balance. It also appears in your transactions.</p>
+  <div class="actions" style="margin-top: 24px;">
+    <a class="btn" href="{% url 'dashboard' %}">Go to overview</a>
+    <a class="btn btn-secondary" href="{% url 'transactions' %}">View transactions</a>
   </div>
-</div>
-
+</section>
 {% endblock %}

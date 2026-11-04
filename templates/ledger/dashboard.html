@@ -1,343 +1,310 @@
 {% extends 'base.html' %}
 {% load custom_filters %}
-{% block title %}Dashboard – Arona Fintech Bank{% endblock %}
-
+{% block title %}Overview | Secure Fund{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-
-
-  <div class="dashboard-box nav-mini mb-4 mx-auto">
-    <div class="dashboard-nav-box">
-      <a href="{% url 'home' %}" class="dashboard-btn">🏠 Home</a>
-      <a href="{% url 'pdf_statement' %}" class="dashboard-btn">📄 Download Statement</a>
-      <a href="{% url 'risk_profile' %}" class="dashboard-btn">👤 Investor Profile</a>
-      <a href="{% url 'portfolio_list' %}" class="dashboard-btn">📊 Model Portfolios</a>
-      <a href="#" id="darkToggle" class="dashboard-btn"><i class="fas fa-moon"></i> Dark Mode</a>
-  {% if not user.is_staff %}
-      <a href="{% url 'inbox' %}" class="dashboard-btn">📥 Chat with Admins!</a>
-  {% endif %}      
-  {% if not user.is_staff %}
-      <a href="{% url 'kyc_upload' %}" class="dashboard-btn">📁 Upload KYC Docs</a>
-  {% endif %}
-  {% if user.is_staff %}
-      <a href="{% url 'admin_dashboard' %}" class="dashboard-btn">🛠️ Staff Dashboard</a>
-  {% endif %}
-  <form action="{% url 'logout' %}" method="post" style="display: inline;">
-    {% csrf_token %}
-      <button type="submit" class="dashboard-btn">🔓 Logout</button>
-</form>
-    </div>
+<div class="page-head">
+  <div>
+    <h1>Overview</h1>
+    <p>Welcome back, {{ user.first_name|default:user.username }}.</p>
   </div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'pdf_statement' %}">Download statement</a>
+  </div>
+</div>
 
-  <div style="display: flex; align-items: flex-start; gap: 2rem; flex-wrap: wrap;">
-
-
-    <div style="flex: 2 1 0; min-width: 300px;">
-      <div class="dashboard-box mb-4">
-        <h2><span class="dashboard-title-box">🏦 Welcome, {{ user.first_name }}</span></h2>
-        <div class="dashboard-balance mb-4"><strong>Balance:</strong> ${{ account.balance }}</div>
-        {% if messages %}
-  {% for message in messages %}
-    {% if message.tags == 'error' and 'deposit' in message.message|lower %}
-      <div class="alert alert-danger">{{ message }}</div>
-      {% endif %}
-    {% endfor %}
+<div class="stack">
+  {% if rebalance_alert %}
+  <div class="notice notice-warning">
+    <span>Your <strong>{{ rebalance_alert.portfolio }}</strong> portfolio has drifted {{ rebalance_alert.drift }}% from its target mix.</span>
+    <span class="actions">
+      <a href="{% url 'manual_rebalance' %}">Rebalance by hand</a>
+      <form method="post" action="{% url 'enable_auto_rebalance' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-small">Turn on auto-rebalancing</button>
+      </form>
+    </span>
+  </div>
   {% endif %}
 
-        <div class="dashboard-actions">
-          <form method="post" action="{% url 'create_checkout_session' %}">
-            {% csrf_token %}
-            <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input type="number" name="amount" class="form-control" placeholder="Amount" min="1" step="0.01" required>
-               <button class="btn btn-primary input-group-text" type="submit">
-                    Deposit
-                </button>
-            </div>
-          </form>
-          <div class="mt-2">
-  <a href="https://docs.google.com/document/d/1Buti0FxZI-_rRxxR5JzVtrw5a9tT4dyKBidL33jOL4E/edit?tab=t.0" target="_blank" style="color: black;">
-    Find credit card details to deposit money here
-  </a>
-</div>
-        </div>
-      </div>
-
-
-      <div class="dashboard-box transactions-box mb-4">
-        <h3 class="text-center mb-3"><span class="dashboard-title-box">Recent Transactions 🧾</span></h3>
-        <div class="dashboard-table mb-4">
-          <table class="table table-borderless table-striped">
-            <thead>
-              <tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th></tr>
-            </thead>
-            <tbody>
-              {% for tx in transactions %}
-              <tr>
-                <td>{{ tx.timestamp|date:"Y-m-d H:i" }}</td>
-                <td>{{ tx.get_transaction_type_display }}</td>
-                <td>${{ tx.amount }}</td>
-                <td>{{ tx.description }}</td>
-              </tr>
-              {% empty %}
-              <tr><td colspan="4">No transactions yet.</td></tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          <div class="text-center" style="margin-top: 2rem;">
-            <a href="{% url 'transactions' %}" class="btn btn-primary">View All Transactions</a>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="dashboard-box p-3 text-black-light" style="font-size: 1rem;">   
-       <h4 class="text-center mb-3" style="font-size: 1.25rem;"><span class="dashboard-title-box">📈 Live Stock Prices</span></h4>
-        <ul class="list-group mb-3">
-          {% for stock in stock_data %}
-          <li class="list-group-item d-flex justify-content-between">
-            <strong>{{ stock.symbol }}</strong>
-            <span>${{ stock.price }}</span>
-          </li>
-          {% endfor %}
-        </ul>
-
-
-        <form method="get" action="{% url 'dashboard' %}">
-          <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search ticker (e.g., AAPL)" required>
-            <button class="btn btn-primary" type="submit">Search</button>
-          </div>
-        </form>
-
-        {% if search_result %}
-          {% if search_result.error %}
-          <div class="alert alert-danger mt-2">{{ search_result.error }}</div>
-          {% else %}
-          <div class="alert alert-success mt-2">
-            <strong>{{ search_result.symbol }}</strong> = ${{ search_result.price }}
-          </div>
-          {% endif %}
-        {% endif %}
-      </div>
+  <section class="band" aria-label="Cash balance">
+    <div>
+      <p class="band-label">Cash balance</p>
+      <p class="band-figure">${{ account.balance|floatformat:"2g" }}</p>
+      <p class="band-meta">Account opened {{ account.created_at|date:"M j, Y" }}{% if account.auto_rebalance_enabled %}. Auto-rebalancing is on.{% endif %}</p>
     </div>
-
-
-    <div style="flex: 1 1 0; min-width: 300px; max-width: 400px;">
-      <div class="dashboard-box mb-4 text-black-light">
-        <h2 style="font-size: 1.5rem;"><span class="dashboard-title-box">📊 Simulated Trading</span></h2>
-            {% if trade_error %}
-             <div class="alert alert-danger">{{ trade_error }}</div>
-            {% endif %}
-        <form method="post" action="{% url 'trade' %}">
-          {% csrf_token %}
-          {{ trade_form.as_p }}
-          <button type="submit" class="btn btn-primary w-100">Execute Trade</button>
-        </form>
-      </div>
-
-
-      {% if holdings %}
-      <div class="dashboard-box mb-4">
-        <h3 class="text-center"><span class="dashboard-title-box">📈 Your Portfolio</span></h3>
-        <canvas id="portfolioChart" style="max-height: 300px;"></canvas>
-      </div>
-      {% endif %}
-    </div>
-
-
-    {% if rebalance_alert %}
-    <div style="flex: 1 1 0; min-width: 250px;">
-      <div class="dashboard-box alert alert-warning text-center p-4">
-        <h4 class="text-center mb-3" style="font-size: 1.25rem;">🚨 <strong>Rebalance Suggested</strong></h4>
-        <p>Your <strong>{{ rebalance_alert.portfolio }}</strong> portfolio has drifted by <strong>{{ rebalance_alert.drift }}%</strong>.</p>
-        <form method="post" action="{% url 'enable_auto_rebalance' %}" class="mb-2">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-primary w-100">Enable Auto-Rebalancing</button>
-        </form>
-      </div>
-    </div>
-    {% endif %}
-
-
-    <div style="flex: 1 1 0; min-width: 250px;">
-      {% if risk_profile %}
-        {% if account.balance > 0 %}
-        <div class="dashboard-box">
-          <h4 class="text-center mb-3" style="font-size: 1.25rem;"><span class="dashboard-title-box">📊 <strong>Investor Profile</strong></span></h4>
-          <p><strong>{{ risk_profile.investor_type }}</strong></p>
-          <p class="mb-3">{{ recommendations.description }}</p>
-
-
-          <h5>Asset Allocation</h5>
-          <ul class="list-unstyled mb-3">
-            {% for klass, alloc in recommendations.allocation.items %}
-            <li>{{ klass }}: {{ alloc }}</li>
-            {% endfor %}
-          </ul>
-
-
-          <h5>Suggested Products</h5>
-          <ul class="list-group list-group-flush mb-3">
-            {% for product in recommendations.products %}
-            <li class="list-group-item">{{ product }}</li>
-            {% endfor %}
-          </ul>
-
-          <form method="get" action="{% url 'manual_rebalance' %}" class="text-center">
-            <button type="submit" class="btn btn-primary w-100 mt-2">Rebalance Manually</button>
-          </form>
+    <form method="post" action="{% url 'create_checkout_session' %}">
+      {% csrf_token %}
+      <label for="deposit-amount">Add funds</label>
+      <div class="input-row">
+        <div class="prefix">
+          <span>$</span>
+          <input type="number" name="amount" id="deposit-amount" min="1" max="100000" step="0.01" placeholder="0.00" inputmode="decimal" required>
         </div>
+        <button class="btn" type="submit">Deposit</button>
+      </div>
+      <p class="help">Pays with a Stripe test card. Card numbers are in the <a href="https://docs.google.com/document/d/1Buti0FxZI-_rRxxR5JzVtrw5a9tT4dyKBidL33jOL4E/edit?tab=t.0" target="_blank" rel="noopener">demo guide</a>.</p>
+    </form>
+  </section>
 
-
-        {% if gains %}
-        <div class="dashboard-box mb-4">
-          <h3 class="text-center"><span class="dashboard-title-box">📉 Gains / Losses</span></h3>
-          <table class="table table-sm table-striped text-center">
-            <thead><tr><th>Ticker</th><th>Gain / Loss</th></tr></thead>
-            <tbody>
-              {% for g in gains %}
-              <tr>
-                <td>{{ g.ticker }}</td>
-                <td>
-                  {% if g.gain > 0 %}
-                  <span style="color: green;">+${{ g.gain }}</span>
-                  {% elif g.gain < 0 %}
-                  <span style="color: red;">-${{ g.gain|absolute }}</span>
-                  {% else %}
-                  $0.00
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+  <div class="grid grid-main">
+    <section class="panel panel-flush">
+      <div class="panel-head">
+        <div>
+          <h2>Holdings</h2>
+          <p>Valued at the latest market close.</p>
         </div>
-        {% endif %}
-
-
-        <div class="dashboard-box mb-4">
-          <h3 class="text-center"><span class="dashboard-title-box">⛰️ Asset Prices Over Time</span></h3>
-          <ul class="text-center list-unstyled mb-3 small">
+        <a href="{% url 'portfolio_list' %}">Compare to model</a>
+      </div>
+      {% if asset_chart_data %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr><th>Ticker</th><th class="num">Shares</th><th class="num hide-sm">Price</th><th class="num">Value</th><th class="num">Gain or loss</th></tr>
+          </thead>
+          <tbody>
             {% for asset in asset_chart_data %}
-            <li class="text-muted"><strong>{{ asset.ticker }}</strong> — {{ asset.quantity|floatformat:2 }} shares @ ${{ asset.nav|floatformat:2 }} = ${{ asset.value|floatformat:2 }}</li>
-            {% empty %}
-            <li class="text-muted">You don’t currently hold any assets.</li>
+            <tr>
+              <td class="cell-primary">{{ asset.ticker }}</td>
+              <td class="num">{{ asset.quantity|floatformat:"-4" }}</td>
+              <td class="num hide-sm">${{ asset.nav|floatformat:"2g" }}</td>
+              <td class="num">${{ asset.value|floatformat:"2g" }}</td>
+              <td class="num">
+                {% for g in gains %}{% if g.ticker == asset.ticker %}
+                  {% if g.gain > 0 %}<span class="pos">+${{ g.gain|floatformat:"2g" }}</span>
+                  {% elif g.gain < 0 %}<span class="neg">&minus;${{ g.gain|absolute|floatformat:"2g" }}</span>
+                  {% else %}<span class="muted">$0.00</span>{% endif %}
+                {% endif %}{% endfor %}
+              </td>
+            </tr>
             {% endfor %}
-          </ul>
-          <canvas id="priceChart" height="300"></canvas>
-        </div>
-
-        {% else %}
-        <div class="dashboard-box text-center text-black-light">
-          <p>Please deposit some funds using the deposit box to see your asset allocation and recommendations.</p>
-        </div>
-        {% endif %}
+          </tbody>
+        </table>
+      </div>
       {% else %}
-      <div class="dashboard-box text-center">
-        <p>You haven’t completed your Investor Profile yet.</p>
-        <a href="{% url 'risk_profile' %}" class="btn btn-primary btn-sm mt-3">Take Questionnaire</a>
+      <div class="empty">
+        <p>You don't own any shares yet.</p>
+        <a class="btn btn-secondary btn-small" href="#trade">Place your first trade</a>
       </div>
       {% endif %}
-    </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Allocation</h2>
+      </div>
+      {% if data %}
+      <div class="chart-box"><canvas id="allocation-chart" aria-label="Holdings by market value"></canvas></div>
+      {% else %}
+      <p class="muted small">Your mix of holdings shows here once you own shares.</p>
+      {% endif %}
+    </section>
   </div>
+
+  <div class="grid grid-3">
+    <section class="panel" id="trade">
+      <div class="panel-head">
+        <div>
+          <h2>Trade</h2>
+          <p>Orders fill at the latest close.</p>
+        </div>
+      </div>
+      {% if trade_error %}<div class="notice notice-error flash">{{ trade_error }}</div>{% endif %}
+      <form method="post" action="{% url 'trade' %}">
+        {% csrf_token %}
+        <div class="field">
+          <div class="choices choices-2" role="radiogroup" aria-label="Order type">
+            <label class="choice"><input type="radio" name="trade_type" value="BUY" {% if trade_form.trade_type.value != 'SELL' %}checked{% endif %}><span>Buy</span></label>
+            <label class="choice"><input type="radio" name="trade_type" value="SELL" {% if trade_form.trade_type.value == 'SELL' %}checked{% endif %}><span>Sell</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="trade-ticker">Ticker</label>
+          <input type="text" name="ticker" id="trade-ticker" maxlength="10" placeholder="AAPL" value="{{ trade_form.ticker.value|default:'' }}" autocapitalize="characters" autocomplete="off" required>
+          {% for error in trade_form.ticker.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="field">
+          <label for="trade-qty">Shares</label>
+          <input type="number" name="quantity" id="trade-qty" min="0.01" step="0.01" placeholder="10" value="{{ trade_form.quantity.value|default:'' }}" inputmode="decimal" required>
+          {% for error in trade_form.quantity.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+        <button type="submit" class="btn btn-block">Place order</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Market prices</h2>
+          <p>Last close, in US dollars.</p>
+        </div>
+      </div>
+      <ul class="list">
+        {% for stock in stock_data %}
+        <li><span class="cell-primary">{{ stock.symbol }}</span><span class="num">{% if stock.price == 'N/A' %}<span class="muted">Unavailable</span>{% else %}${{ stock.price|floatformat:"2g" }}{% endif %}</span></li>
+        {% endfor %}
+      </ul>
+      <form method="get" action="{% url 'dashboard' %}" class="field" style="margin-top: 20px;">
+        <label for="quote-search">Look up a ticker</label>
+        <div class="input-row">
+          <input type="search" name="search" id="quote-search" placeholder="NVDA" autocapitalize="characters" autocomplete="off" required>
+          <button class="btn btn-secondary" type="submit">Get quote</button>
+        </div>
+      </form>
+      {% if search_result %}
+        {% if search_result.error %}
+        <div class="notice notice-error" style="margin-top: 12px;">{{ search_result.error }}</div>
+        {% else %}
+        <div class="notice" style="margin-top: 12px;"><strong>{{ search_result.symbol }}</strong><span class="num">${{ search_result.price|floatformat:"2g" }}</span></div>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Investor profile</h2>
+        {% if risk_profile %}<a href="{% url 'risk_profile' %}">Retake</a>{% endif %}
+      </div>
+      {% if not risk_profile %}
+      <p class="muted">Answer four questions about your goals and comfort with risk. We'll suggest a mix of assets to match.</p>
+      <a href="{% url 'risk_profile' %}" class="btn btn-secondary">Start questionnaire</a>
+      {% else %}
+      <p class="result-figure" style="font-size: 2rem;">{{ risk_profile.investor_type }}</p>
+      <p class="muted small">{{ recommendations.description }}</p>
+      {% if account.balance > 0 %}
+      <div class="meter" aria-hidden="true">
+        {% for klass, alloc in recommendations.allocation.items %}<span style="width: {{ alloc }};"></span>{% endfor %}
+      </div>
+      <ul class="legend">
+        {% for klass, alloc in recommendations.allocation.items %}
+        <li><span class="swatch"></span><span>{{ klass }}</span><span>{{ alloc }}</span></li>
+        {% endfor %}
+      </ul>
+      <h3 style="margin: 20px 0 8px;">Suggested funds</h3>
+      <ul class="list">
+        {% for product in recommendations.products %}<li><span>{{ product }}</span></li>{% endfor %}
+      </ul>
+      <a href="{% url 'manual_rebalance' %}" class="btn btn-secondary btn-block" style="margin-top: 20px;">Rebalance by hand</a>
+      {% else %}
+      <p class="small">Deposit funds to see your target allocation and suggested funds.</p>
+      {% endif %}
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="panel panel-flush">
+    <div class="panel-head">
+      <h2>Recent activity</h2>
+      <a href="{% url 'transactions' %}">All transactions</a>
+    </div>
+    {% if transactions %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Date</th><th>Description</th><th class="hide-sm">Type</th><th class="num">Amount</th></tr>
+        </thead>
+        <tbody>
+          {% for tx in transactions %}
+          <tr>
+            <td class="muted">{{ tx.timestamp|date:"M j, Y" }}<span class="cell-sub">{{ tx.timestamp|date:"g:i A" }}</span></td>
+            <td>{{ tx.description }}</td>
+            <td class="hide-sm">{{ tx.get_transaction_type_display }}</td>
+            <td class="num">{% if tx.transaction_type == 'CR' %}<span class="pos">+${{ tx.amount|floatformat:"2g" }}</span>{% else %}&minus;${{ tx.amount|floatformat:"2g" }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty"><p>No activity yet. Your first deposit will show up here.</p></div>
+    {% endif %}
+  </section>
+
+  {% if price_history_data.labels|length > 1 %}
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Trade prices</h2>
+        <p>The price you paid or received on each trade date.</p>
+      </div>
+    </div>
+    <div class="chart-box chart-box-tall"><canvas id="price-chart" aria-label="Trade prices by date"></canvas></div>
+  </section>
+  {% endif %}
 </div>
 
+{{ labels|json_script:"allocation-labels" }}
+{{ data|json_script:"allocation-values" }}
+{{ price_history_data|json_script:"price-history" }}
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const portfolioCtx = document.getElementById('portfolioChart');
-  if (portfolioCtx) {
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    new Chart(portfolioCtx, {
-      type: 'doughnut',
-      data: {
-        labels: {{ labels|safe }},
-        datasets: [{
-          data: {{ data|safe }},
-          backgroundColor: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6610f2', '#e83e8c', '#6f42c1', '#20c997', '#fd7e14'],
-          borderColor: isDarkMode ? '#1a1a1a' : '#ffffff',
-          borderWidth: 2,
-          hoverOffset: 10
-        }]
-      },
-      options: {
-        responsive: true,
-        cutout: '65%',
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: isDarkMode ? '#ffffff' : '#000000' }
-          },
-          tooltip: {
-            backgroundColor: isDarkMode ? '#333' : '#fff',
-            titleColor: isDarkMode ? '#fff' : '#000',
-            bodyColor: isDarkMode ? '#fff' : '#000'
-          }
-        }
-      }
-    });
-  }
-});
-</script>
+(function () {
+  var charts = [];
+  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function read(id) { var el = document.getElementById(id); return el ? JSON.parse(el.textContent) : null; }
+  function money(v) { return "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
+  function draw() {
+    charts.forEach(function (c) { c.destroy(); });
+    charts = [];
+    var palette = ["--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5", "--chart-6"].map(css);
+    var ink = css("--muted");
+    var rule = css("--rule");
+    var surface = css("--surface");
+    Chart.defaults.font.family = css("--font");
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = ink;
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const ctx = document.getElementById('priceChart');
-  if (ctx) {
-    const isDarkMode = document.body.classList.contains('dark-mode');
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: {{ price_history_data.labels|safe }},
-        datasets: [
-          {% for set in price_history_data.datasets %}
-          {
-            label: '{{ set.label }}',
-            data: {{ set.data|safe }},
-            fill: true,
-            tension: 0.4,
-            borderColor: '#36A2EB',
-            backgroundColor: 'rgba(54,162,235,0.2)',
-            pointRadius: 3,
-            pointBackgroundColor: isDarkMode ? '#fff' : '#000',
-            pointBorderColor: '#36A2EB',
-            pointBorderWidth: 2
-          }{% if not forloop.last %},{% endif %}
-          {% endfor %}
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            labels: { color: isDarkMode ? '#fff' : '#000' }
-          },
-          tooltip: {
-            backgroundColor: isDarkMode ? '#333' : '#fff',
-            titleColor: isDarkMode ? '#fff' : '#000',
-            bodyColor: isDarkMode ? '#fff' : '#000'
-          }
+    var allocation = document.getElementById("allocation-chart");
+    if (allocation) {
+      charts.push(new Chart(allocation, {
+        type: "doughnut",
+        data: {
+          labels: read("allocation-labels"),
+          datasets: [{ data: read("allocation-values"), backgroundColor: palette, borderColor: surface, borderWidth: 2 }]
         },
-        scales: {
-          x: {
-            ticks: { color: isDarkMode ? '#fff' : '#000' },
-            title: { display: true, text: 'Date', color: isDarkMode ? '#fff' : '#000' },
-            grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-          },
-          y: {
-            ticks: { color: isDarkMode ? '#fff' : '#000' },
-            title: { display: true, text: 'Price ($)', color: isDarkMode ? '#fff' : '#000' },
-            grid: { color: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
+        options: {
+          maintainAspectRatio: false,
+          cutout: "68%",
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, padding: 14 } },
+            tooltip: { callbacks: { label: function (ctx) { return " " + ctx.label + "  " + money(ctx.parsed); } } }
           }
         }
-      }
-    });
+      }));
+    }
+
+    var price = document.getElementById("price-chart");
+    var history = read("price-history");
+    if (price && history) {
+      charts.push(new Chart(price, {
+        type: "line",
+        data: {
+          labels: history.labels,
+          datasets: history.datasets.map(function (set, i) {
+            var color = palette[i % palette.length];
+            return { label: set.label, data: set.data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0, stepped: "before" };
+          })
+        },
+        options: {
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 10, boxHeight: 10, padding: 14 } },
+            tooltip: { callbacks: { label: function (ctx) { return " " + ctx.dataset.label + "  " + money(ctx.parsed.y); } } }
+          },
+          scales: {
+            x: { grid: { display: false }, border: { color: rule } },
+            y: { grid: { color: rule }, border: { display: false }, ticks: { callback: function (v) { return money(v); } } }
+          }
+        }
+      }));
+    }
   }
-});
+
+  if (window.Chart) { draw(); document.addEventListener("themechange", draw); }
+})();
 </script>
 {% endblock %}
