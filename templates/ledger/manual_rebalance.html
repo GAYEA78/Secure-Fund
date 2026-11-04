@@ -1,91 +1,48 @@
 {% extends 'base.html' %}
-{% block title %}Manual Rebalance – Arona Fintech Bank{% endblock %}
+{% block title %}Rebalance | Secure Fund{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
 {% block content %}
-<style>
-  .full-height-center {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 60px 15px 30px;
-    position: relative;
-  }
-  .form-section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    background-color: #f0f8ff;
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-  .form-label {
-    font-weight: 500;
-    font-size: 1.1rem;
-  }
-  .form-control,
-  .form-select {
-    font-size: 1.1rem;
-    padding: 10px;
-  }
-  .btn-submit {
-    font-size: 1.2rem;
-    padding: 12px;
-    margin-top: 1.5rem;
-  }
-  .back-btn-top {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
-  }
-</style>
+<div class="page-head">
+  <div>
+    <a class="crumb" href="{% url 'portfolio_list' %}">Portfolios</a>
+    <h1>Rebalance by hand</h1>
+    <p>Set a new target for each asset in your model portfolio. Targets should add up to 100%.</p>
+  </div>
+</div>
 
-<div class="full-height-center">
-  <div class="dashboard-box w-100" style="max-width: 700px; position: relative;">
-    <div class="back-btn-top">
-      <a href="{% url 'dashboard' %}" class="btn btn-primary text-decoration-none">← Back to Dashboard</a>
-    </div>
-
-    <h2 class="text-center mb-4">Manual Rebalance</h2>
-
-    <form method="post" action="{% url 'apply_manual_rebalance' %}">
-      {% csrf_token %}
-      <div class="form-section-title">Asset Allocation Table</div>
-      <table class="table table-bordered">
+<form method="post" action="{% url 'apply_manual_rebalance' %}" data-sum>
+  {% csrf_token %}
+  <section class="panel panel-flush">
+    <div class="table-wrap">
+      <table class="table">
         <thead>
-          <tr>
-            <th>Asset</th>
-            <th>Current Allocation (%)</th>
-            <th>Target Allocation (%)</th>
-          </tr>
+          <tr><th>Asset</th><th class="num">Current</th><th class="num">New target</th></tr>
         </thead>
         <tbody>
           {% for target, current in paired_allocation %}
           <tr>
-            <td>{{ target.asset }}</td>
-            <td>{{ current.actual_pct }}%</td>
-            <td>
-              <input
-                type="text"
-                name="target_{{ target.asset }}"
-                value="{{ target.target_pct }}"
-                pattern="\d+([.,]\d{1,2})?"
-                inputmode="decimal"
-                class="form-control"
-                required
-              >
+            <td class="cell-primary"><label for="target-{{ target.asset }}" style="margin: 0; font-size: inherit; color: inherit;">{{ target.asset }}</label></td>
+            <td class="num">{{ current.actual_pct|floatformat:2 }}%</td>
+            <td class="num">
+              <div class="prefix" style="display: inline-block;">
+                <input type="text" name="target_{{ target.asset }}" id="target-{{ target.asset }}" value="{{ target.target_pct }}" pattern="\d+([.,]\d{1,2})?" inputmode="decimal" required data-sum-input style="padding-left: 10px; padding-right: 26px;">
+                <span style="left: auto; right: 10px;">%</span>
+              </div>
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
+    </div>
+    <div class="panel-foot" style="display: flex; justify-content: space-between; align-items: center; gap: 16px;">
+      <span class="muted">Total of new targets</span>
+      <strong class="num" data-sum-output>0.00%</strong>
+    </div>
+  </section>
 
-      <div class="text-center">
-        <button type="submit" class="btn btn-primary w-100 btn-submit">Apply Manual Changes</button>
-      </div>
-    </form>
+  <div class="actions" style="margin-top: 24px;">
+    <button type="submit" class="btn btn-large">Save targets</button>
+    <a href="{% url 'portfolio_list' %}" class="btn btn-large btn-secondary">Cancel</a>
   </div>
-</div>
+</form>
 {% endblock %}

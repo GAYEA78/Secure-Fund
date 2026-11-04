@@ -1,43 +1,55 @@
 {% extends 'base.html' %}
-{% block title %}Inbox{% endblock %}
+{% block title %}Support | Secure Fund{% endblock %}
 {% block content %}
-<div class="dashboard-container text-black-light">
-  <div class="dashboard-box nav-mini mb-4 mx-auto">
-    <div class="dashboard-nav-box">
-      <a href="{% url 'dashboard' %}" class="dashboard-btn">⬅ Back to Dashboard</a>
-    </div>
+<div class="page-head">
+  <div>
+    <h1>Support</h1>
+    <p>Questions about deposits, trades or verification. Staff reply here.</p>
   </div>
-  <div class="dashboard-box mb-4">
-    <h2>📩 Message Support</h2>
-    <form method="post">
-      {% csrf_token %}
-      <div class="mb-3">
-        <label>Message:</label>
-        <textarea name="content" class="form-control" required rows="3"></textarea>
-      </div>
-      <button class="btn btn-primary w-100">Send Message</button>
-    </form>
-  </div>
+</div>
 
-  <div class="dashboard-box">
-    <h3>💬 Your Conversations</h3>
+<div class="grid grid-main" style="align-items: start;">
+  <div class="stack">
     {% for convo in grouped_conversations %}
-      <div class="mb-4 p-3 border rounded shadow-sm bg-light">
-        <h5>🛡️ {{ convo.admin.username }}</h5>
-        <ul class="list-group mt-2">
-          {% for msg in convo.messages %}
-            <li class="list-group-item {% if msg.sender == request.user %}list-group-item-success{% else %}list-group-item-secondary{% endif %}">
-              <strong>
-                {% if msg.sender == request.user %}You{% else %}Admin{% endif %}
-              </strong>: {{ msg.content }}<br>
-              <small class="text-muted">{{ msg.timestamp|date:"Y-m-d H:i" }}</small>
-            </li>
-          {% endfor %}
-        </ul>
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>{{ convo.admin.first_name|default:convo.admin.username }}</h2>
+          <p>Support team</p>
+        </div>
+        <a href="{% url 'inbox_chat' convo.admin.id %}">Open conversation</a>
       </div>
+      <div class="thread-log">
+        {% for msg in convo.messages %}
+        <div class="msg{% if msg.sender == request.user %} msg-own{% endif %}">
+          <div class="msg-body">{{ msg.content }}</div>
+          <div class="msg-meta">{% if msg.sender == request.user %}You{% else %}{{ msg.sender.first_name|default:msg.sender.username }}{% endif %}, {{ msg.timestamp|date:"M j, g:i A" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
     {% empty %}
-      <p>No messages yet.</p>
+    <section class="panel">
+      <div class="empty"><p>No conversations yet. Send a message and the support team will reply here.</p></div>
+    </section>
     {% endfor %}
   </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>New message</h2>
+        <p>Goes to everyone on the support team.</p>
+      </div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label for="support-message">Message</label>
+        <textarea name="content" id="support-message" rows="5" placeholder="Describe what you need help with" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-block">Send message</button>
+    </form>
+  </section>
 </div>
 {% endblock %}

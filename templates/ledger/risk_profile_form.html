@@ -1,95 +1,73 @@
 {% extends 'base.html' %}
-{% load form_tags %}
-
-{% block title %}Investor Questionnaire – Arona FinTech Bank{% endblock %}
-
-{% block content %}
+{% block title %}Investor profile | Secure Fund{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
+{% block head %}
 <style>
-  .full-height-center {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 60px 15px 30px;
-    position: relative;
-  }
-
-  .form-section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    background-color: #f0f8ff;
-    padding: 10px 15px;
-    border-radius: 5px;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-
-  .form-label {
-    font-weight: 500;
-    font-size: 1.1rem;
-  }
-
-  .form-control,
-  .form-select {
-    font-size: 1.1rem;
-    padding: 10px;
-  }
-
-  .btn-submit {
-    font-size: 1.2rem;
-    padding: 12px;
-    margin-top: 1.5rem;
-  }
-
-  .back-btn-top {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 10;
-  }
+  .question { border: 0; margin: 0; padding: 24px 0; border-top: 1px solid var(--rule); }
+  .question:first-of-type { border-top: 0; padding-top: 0; }
+  .question legend { float: left; width: 100%; font-weight: 600; font-size: 0.9375rem; padding: 0; margin-bottom: 4px; }
+  .question legend + * { clear: both; }
+  .question .help { margin: 0 0 14px; }
+  .question input[type="number"] { max-width: 160px; }
 </style>
-
-<div class="full-height-center">
-  <div class="dashboard-box w-100" style="max-width: 700px; position: relative;">
-    <div class="back-btn-top">
-      <a href="{% url 'dashboard' %}" class="btn btn-primary text-decoration-none">← Back to Dashboard</a>
-
-    </div>
-
-    <h2 class="text-center mb-4">Investor Profile Questionnaire</h2>
-
-    <form method="post">
-      {% csrf_token %}
-
-      <div class="form-section-title">Experience</div>
-      <div class="mb-3">
-        <label class="form-label" for="{{ form.experience.id_for_label }}">{{ form.experience.label }}</label>
-        {{ form.experience|add_class:"form-select" }}
-      </div>
-
-      <div class="form-section-title">Goals</div>
-      <div class="mb-3">
-        <label class="form-label" for="{{ form.goals.id_for_label }}">{{ form.goals.label }}</label>
-        {{ form.goals|add_class:"form-select" }}
-      </div>
-
-      <div class="form-section-title">Time Horizon</div>
-      <div class="mb-3">
-        <label class="form-label" for="{{ form.time_horizon.id_for_label }}">Years you plan to invest</label>
-        {{ form.time_horizon|add_class:"form-control" }}
-      </div>
-
-      <div class="form-section-title">Risk Tolerance</div>
-      <div class="mb-3">
-        <label class="form-label" for="{{ form.risk_tolerance.id_for_label }}">{{ form.risk_tolerance.label }}</label>
-        {{ form.risk_tolerance|add_class:"form-select" }}
-      </div>
-
-      <div class="text-center">
-        <button type="submit" class="btn btn-primary w-100 btn-submit">Submit</button>
-      </div>
-    </form>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Investor profile</h1>
+    <p>Four questions about your goals and comfort with risk. Your answers set your target allocation and the model portfolio you're compared against.</p>
   </div>
 </div>
+
+<section class="panel">
+  <form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="notice notice-error flash">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>{% endif %}
+
+    <fieldset class="question">
+      <legend>How much investing experience do you have?</legend>
+      <p class="help">Count any time you've bought stocks, funds or bonds yourself.</p>
+      <div class="choices choices-3">
+        {% for value, label in form.experience.field.choices %}{% if value %}
+        <label class="choice"><input type="radio" name="experience" value="{{ value }}" {% if form.experience.value == value %}checked{% endif %} required><span>{{ label }}</span></label>
+        {% endif %}{% endfor %}
+      </div>
+      {% for error in form.experience.errors %}<div class="error">{{ error }}</div>{% endfor %}
+    </fieldset>
+
+    <fieldset class="question">
+      <legend>What's your main goal for this money?</legend>
+      <p class="help">Pick the one that matters most.</p>
+      <div class="choices choices-3">
+        {% for value, label in form.goals.field.choices %}{% if value %}
+        <label class="choice"><input type="radio" name="goals" value="{{ value }}" {% if form.goals.value == value %}checked{% endif %} required><span>{{ label }}</span></label>
+        {% endif %}{% endfor %}
+      </div>
+      {% for error in form.goals.errors %}<div class="error">{{ error }}</div>{% endfor %}
+    </fieldset>
+
+    <fieldset class="question">
+      <legend><label for="id_time_horizon" style="margin: 0; font-size: inherit; color: inherit; font-weight: inherit;">How many years do you plan to stay invested?</label></legend>
+      <p class="help">Longer horizons can ride out bigger swings.</p>
+      <input type="number" name="time_horizon" id="id_time_horizon" min="1" max="60" step="1" value="{{ form.time_horizon.value|default:'' }}" inputmode="numeric" placeholder="10" required>
+      {% for error in form.time_horizon.errors %}<div class="error">{{ error }}</div>{% endfor %}
+    </fieldset>
+
+    <fieldset class="question">
+      <legend>How much risk are you comfortable with?</legend>
+      <p class="help">Higher risk means larger ups and downs in exchange for more expected growth.</p>
+      <div class="choices choices-3">
+        {% for value, label in form.risk_tolerance.field.choices %}{% if value %}
+        <label class="choice"><input type="radio" name="risk_tolerance" value="{{ value }}" {% if form.risk_tolerance.value == value %}checked{% endif %} required><span>{{ label }}</span></label>
+        {% endif %}{% endfor %}
+      </div>
+      {% for error in form.risk_tolerance.errors %}<div class="error">{{ error }}</div>{% endfor %}
+    </fieldset>
+
+    <div class="actions" style="border-top: 1px solid var(--rule); padding-top: 24px;">
+      <button type="submit" class="btn btn-large">See my profile</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-large btn-secondary">Cancel</a>
+    </div>
+  </form>
+</section>
 {% endblock %}

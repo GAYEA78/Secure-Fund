@@ -1,41 +1,54 @@
 {% extends 'base.html' %}
-{% block title %}KYC Status – Arona Fintech Bank{% endblock %}
+{% block title %}Verification | Secure Fund{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-
-  <div class="dashboard-box nav-mini mb-4 mx-auto">
-    <div class="dashboard-nav-box">
-      <a href="{% url 'dashboard' %}" class="dashboard-btn">⬅ Back to Dashboard</a>
-    </div>
+<div class="page-head">
+  <div>
+    <h1>Verification</h1>
+    <p>Identity checks (KYC) unlock the full account. Here's every document you've sent and where it stands.</p>
   </div>
+  {% with latest=docs.0 %}
+  {% if not docs or latest.status == 'R' %}
+  <div class="actions"><a class="btn" href="{% url 'kyc_upload' %}">Upload a document</a></div>
+  {% endif %}
+  {% endwith %}
+</div>
 
-  <div class="dashboard-box">
-    <h2>KYC Status</h2>
+<div class="stack">
+  {% if docs %}
+  {% with latest=docs.0 %}
+  {% if latest.status == 'A' %}
+  <div class="notice notice-success"><span><strong>You're verified.</strong> No more documents are needed.</span></div>
+  {% elif latest.status == 'P' %}
+  <div class="notice"><span><strong>In review.</strong> Your latest document is waiting for a staff member. You'll see the result here.</span></div>
+  {% elif latest.status == 'R' %}
+  <div class="notice notice-error"><span><strong>Not accepted.</strong> Your latest document couldn't be verified. Upload a clear, current ID to try again.</span></div>
+  {% endif %}
+  {% endwith %}
+  {% endif %}
 
-    <ul class="list-group">
-      {% for doc in docs %}
-        <li class="list-group-item d-flex justify-content-between">
-          {{ doc.uploaded_at|date:"Y-m-d H:i" }}
-          <span class="badge bg-secondary">{{ doc.get_status_display }}</span>
-        </li>
-      {% empty %}
-        <li class="list-group-item">No documents uploaded yet.</li>
-      {% endfor %}
-    </ul>
-
+  <section class="panel panel-flush">
+    <div class="panel-head"><h2>Documents</h2></div>
     {% if docs %}
-      {% with latest=docs.0 %}
-        {% if latest.status == 'R' %}
-          <a class="btn btn-primary btn-lg mt-3" href="{% url 'kyc_upload' %}">Upload New Document</a>
-        {% elif latest.status == 'P' %}
-          <div class="alert alert-info mt-3">⏳ Your document is still pending review.</div>
-        {% elif latest.status == 'A' %}
-          <div class="alert alert-success mt-3">✅ Your KYC has been approved.</div>
-        {% endif %}
-      {% endwith %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Uploaded</th><th class="num">Status</th></tr></thead>
+        <tbody>
+          {% for doc in docs %}
+          <tr>
+            <td>{{ doc.uploaded_at|date:"M j, Y" }}<span class="cell-sub">{{ doc.uploaded_at|date:"g:i A" }}</span></td>
+            <td class="num"><span class="tag{% if doc.status == 'A' %} tag-pos{% elif doc.status == 'R' %} tag-neg{% else %} tag-warn{% endif %}">{{ doc.get_status_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% else %}
-      <a class="btn btn-primary btn-lg mt-3" href="{% url 'kyc_upload' %}">Upload New Document</a>
+    <div class="empty">
+      <p>You haven't uploaded a document yet.</p>
+      <a class="btn btn-secondary btn-small" href="{% url 'kyc_upload' %}">Upload a document</a>
+    </div>
     {% endif %}
-  </div>
+  </section>
 </div>
 {% endblock %}

@@ -732,13 +732,13 @@ def kyc_upload(request):
     latest_doc = KycDocument.objects.filter(user=request.user).order_by('-uploaded_at').first()
     if latest_doc:
         if latest_doc.status == KycDocument.PENDING:
-            messages.info(request, "⏳ Your previous document is still pending review by a moderator.")
+            messages.info(request, "Your previous document is still pending review by a moderator.")
             return redirect('kyc_status')
         elif latest_doc.status == KycDocument.APPROVED:
-            messages.success(request, "✅ Your KYC has been approved. No further uploads are needed.")
+            messages.success(request, "Your KYC has been approved. No further uploads are needed.")
             return redirect('kyc_status')
         elif latest_doc.status == KycDocument.REJECTED:
-            messages.warning(request, "❌ Your previous document was denied. Please upload again.")
+            messages.warning(request, "Your previous document was denied. Please upload again.")
 
     if request.method == 'POST':
         form = KycForm(request.POST, request.FILES)
@@ -747,7 +747,7 @@ def kyc_upload(request):
             doc.user = request.user
             doc.status = KycDocument.PENDING
             doc.save()
-            messages.success(request, "📤 Document uploaded successfully. Awaiting review.")
+            messages.success(request, "Document uploaded successfully. Awaiting review.")
             return redirect('kyc_status')
     else:
         form = KycForm()

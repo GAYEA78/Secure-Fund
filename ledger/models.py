@@ -89,7 +89,7 @@ class RiskProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} → {self.investor_type}"
+        return f"{self.user.username}: {self.investor_type}"
 
 
 def determine_investor_type(experience, goals, time_horizon, risk_tolerance):

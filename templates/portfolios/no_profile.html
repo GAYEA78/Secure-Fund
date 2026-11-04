@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
-{% block title %}No Profile – Arona Fintech Bank{% endblock %}
+{% block title %}Portfolios | Secure Fund{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-  <div class="dashboard-box text-center">
-    <p>Please complete your <a href="{% url 'risk_profile' %}">Investor Profile</a> first.</p>
+<div class="page-head">
+  <div>
+    <h1>Portfolios</h1>
   </div>
 </div>
+<section class="panel">
+  <h2>Complete your investor profile first</h2>
+  <p class="muted" style="margin-top: 8px;">Model portfolios are matched to your profile. It takes four questions and about a minute.</p>
+  <a class="btn" href="{% url 'risk_profile' %}" style="margin-top: 16px;">Start questionnaire</a>
+</section>
 {% endblock %}

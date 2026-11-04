@@ -1,47 +1,46 @@
 {% extends 'base.html' %}
-{% block title %}Model Portfolios – Arona Fintech Bank{% endblock %}
+{% block title %}Portfolios | Secure Fund{% endblock %}
 {% block content %}
-
-<div class="dashboard-container">
-
-  <div class="text-center mx-auto my-5" style="max-width: 800px;">
-    <h1 class="dashboard-title-box mb-4" style="font-size: 3rem;">
-      Model Portfolios
-    </h1>
+<div class="page-head">
+  <div>
+    <h1>Model portfolios</h1>
+    <p>How your money would sit in each model today. A line drifting more than 5 points from target is flagged.</p>
   </div>
-
-  <div class="dashboard-nav-box mb-4">
-    <a href="{% url 'dashboard' %}" class="dashboard-btn">
-      ← Back to Dashboard
-    </a>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{% url 'manual_rebalance' %}">Rebalance by hand</a>
   </div>
+</div>
 
+<div class="stack">
   {% for res in results %}
-  <div class="dashboard-box mb-4">
-    <h3>{{ res.portfolio.name }}</h3>
-    <p>{{ res.portfolio.description }}</p>
-    <table class="table table-sm">
-      <thead>
-        <tr><th>Asset</th><th>Target%</th><th>Actual%</th><th>Drift%</th></tr>
-      </thead>
-      <tbody>
-        {% for ln in res.lines %}
-        <tr {% if ln.drift > 5 %}class="table-warning"{% endif %}>
-          <td>{{ ln.asset }}</td>
-          <td>{{ ln.target_pct }}</td>
-          <td>{{ ln.actual_pct }}</td>
-          <td>{{ ln.drift }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% if res.rebalance %}
-    <div class="alert alert-danger">
-      Rebalance recommended (drift {{ res.max_drift }}%)
+  <section class="panel panel-flush">
+    <div class="panel-head">
+      <div>
+        <h2>{{ res.portfolio.name }}</h2>
+        {% if res.portfolio.description %}<p>{{ res.portfolio.description }}</p>{% endif %}
+      </div>
+      {% if res.rebalance %}<span class="tag tag-warn">Drifted {{ res.max_drift }}%</span>{% else %}<span class="tag tag-pos">On target</span>{% endif %}
     </div>
-    {% endif %}
-  </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>Asset</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Drift</th></tr>
+        </thead>
+        <tbody>
+          {% for ln in res.lines %}
+          <tr {% if ln.drift > 5 %}class="row-flag"{% endif %}>
+            <td class="cell-primary">{{ ln.asset }}</td>
+            <td class="num">{{ ln.target_pct|floatformat:2 }}%</td>
+            <td class="num">{{ ln.actual_pct|floatformat:2 }}%</td>
+            <td class="num{% if ln.drift > 5 %} neg{% endif %}">{{ ln.drift|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% empty %}
+  <section class="panel"><div class="empty"><p>No model portfolios are set up yet.</p></div></section>
   {% endfor %}
-
 </div>
 {% endblock %}

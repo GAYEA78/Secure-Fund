@@ -1,41 +1,48 @@
 {% extends 'base.html' %}
-{% block title %}Your Investor Type – Arona Fintech Bank{% endblock %}
+{% block title %}Your investor profile | Secure Fund{% endblock %}
+{% block page_class %}page-narrow{% endblock %}
 {% block content %}
-<div class="dashboard-container">
-  <div class="dashboard-box text-center mx-auto my-5" style="max-width: 800px;">
-    <h1 class="dashboard-title-box mb-4" style="font-size: 3rem;">
-      Your Investor Type
-    </h1>
-    <p class="display-5 text-uppercase mb-4 text-black">{{ profile.investor_type }}</p>
-    <p class="lead mb-4 text-black">{{ recommendations.description }}</p>
+<div class="page-head">
+  <div>
+    <a class="crumb" href="{% url 'dashboard' %}">Overview</a>
+    <h1>Your investor profile</h1>
+  </div>
+</div>
 
-    <h3 class="mt-4 mb-3 text-black">Recommended Asset Allocation</h3>
-    <table class="table table-bordered w-50 mx-auto mb-4">
-      <thead>
-        <tr><th class="text-black">Asset Class</th><th class="text-black">Allocation</th></tr>
-      </thead>
-      <tbody>
-        {% for klass, alloc in recommendations.allocation.items %}
-        <tr>
-          <td class="text-black">{{ klass }}</td>
-          <td class="text-black">{{ alloc }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <h3 class="mb-3 text-black">Suggested Products</h3>
-    <ul class="list-group w-50 mx-auto mb-4">
-      {% for product in recommendations.products %}
-      <li class="list-group-item text-black">{{ product }}</li>
-      {% endfor %}
-    </ul>
-
-    <div class="dashboard-nav-box">
-      <a href="{% url 'dashboard' %}" class="dashboard-btn">
-        Back to Dashboard
-      </a>
+<div class="stack">
+  <section class="band" style="grid-template-columns: minmax(0, 1fr); align-items: start;">
+    <div>
+      <p class="band-label">You're a</p>
+      <p class="band-figure">{{ profile.investor_type }} investor</p>
+      <p class="band-meta" style="font-size: 0.9375rem;">{{ recommendations.description }}</p>
     </div>
+  </section>
+
+  <div class="grid grid-2">
+    <section class="panel">
+      <div class="panel-head"><h2>Target allocation</h2></div>
+      <div class="meter" aria-hidden="true">
+        {% for klass, alloc in recommendations.allocation.items %}<span style="width: {{ alloc }};"></span>{% endfor %}
+      </div>
+      <ul class="legend">
+        {% for klass, alloc in recommendations.allocation.items %}
+        <li><span class="swatch"></span><span>{{ klass }}</span><span>{{ alloc }}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Suggested funds</h2></div>
+      <ul class="list">
+        {% for product in recommendations.products %}<li><span>{{ product }}</span></li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <div class="actions">
+    <a href="{% url 'dashboard' %}" class="btn">Go to overview</a>
+    <a href="{% url 'portfolio_list' %}" class="btn btn-secondary">Compare model portfolios</a>
+    <a href="{% url 'risk_profile' %}" class="btn btn-secondary">Change answers</a>
   </div>
 </div>
 {% endblock %}

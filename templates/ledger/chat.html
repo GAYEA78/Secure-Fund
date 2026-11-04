@@ -1,37 +1,42 @@
 {% extends 'base.html' %}
-{% block title %}Your Inbox{% endblock %}
+{% block title %}Support | Secure Fund{% endblock %}
+{% block flash %}{% endblock %}
 {% block content %}
-<div class="row">
-
-  <div class="col-md-4">
-    <h5>📋 Admins</h5>
-    <ul class="list-group">
-      {% for admin in all_admins %}
-      <a href="{% url 'inbox_chat' admin.id %}" class="list-group-item {% if admin.id == selected_admin.id %}active{% endif %}">
-        {{ admin.username }}
-      </a>
-      {% endfor %}
-    </ul>
+<div class="page-head">
+  <div>
+    <a class="crumb" href="{% url 'inbox' %}">Support</a>
+    <h1>Messages</h1>
   </div>
+</div>
 
-
-  <div class="col-md-8">
-    <h5>💬 Chat with {{ selected_admin.username }}</h5>
-    <div class="border p-3 mb-3" style="height: 300px; overflow-y: scroll;">
+<div class="chat">
+  <nav class="chat-people" aria-label="Support team">
+    <h2>Support team</h2>
+    {% for admin in all_admins %}
+    <a href="{% url 'inbox_chat' admin.id %}" {% if admin.id == selected_admin.id %}aria-current="page"{% endif %}>{{ admin.first_name|default:admin.username }}</a>
+    {% endfor %}
+  </nav>
+  <section class="chat-thread">
+    <div class="chat-head">
+      <h2>{{ selected_admin.first_name|default:selected_admin.username }}</h2>
+      <p>Support team</p>
+    </div>
+    <div class="chat-log" data-scroll-end>
       {% for msg in messages %}
-        <div class="mb-2 {% if msg.sender == request.user %}text-end{% endif %}">
-          <strong>{{ msg.sender.username }}:</strong> {{ msg.content }}<br>
-          <small class="text-muted">{{ msg.timestamp|date:"Y-m-d H:i" }}</small>
-        </div>
+      <div class="msg{% if msg.sender == request.user %} msg-own{% endif %}">
+        <div class="msg-body">{{ msg.content }}</div>
+        <div class="msg-meta">{% if msg.sender == request.user %}You{% else %}{{ msg.sender.first_name|default:msg.sender.username }}{% endif %}, {{ msg.timestamp|date:"M j, g:i A" }}</div>
+      </div>
       {% empty %}
-        <p>No messages yet.</p>
+      <div class="empty"><p>No messages yet. Say hello below.</p></div>
       {% endfor %}
     </div>
-    <form method="post">
+    <form method="post" class="chat-compose">
       {% csrf_token %}
-      <textarea name="content" class="form-control mb-2" placeholder="Type your message..." required></textarea>
-      <button class="btn btn-primary w-100">Send</button>
+      <label for="chat-message" class="visually-hidden">Message</label>
+      <textarea name="content" id="chat-message" placeholder="Write a message" required data-submit-on-enter></textarea>
+      <button type="submit" class="btn">Send</button>
     </form>
-  </div>
+  </section>
 </div>
 {% endblock %}
